@@ -1,15 +1,20 @@
 ---
+#sudo apt-get install ansible
+#mkdir htb
+#cd htb
+#ansible-playbook setup.yml -v --ask-become-pass
 - name: Configuração e Instalação no Debian
   hosts: localhost
   become: yes
 
   tasks:
-    - name: Atualizar todos os pacotes
-      apt:
-        update_cache: yes
-        upgrade: yes
-        autoclean: yes
+    # - name: Atualizar todos os pacotes
+    #   apt:
+    #     update_cache: yes
+    #     upgrade: yes
+    #     autoclean: yes
 
+    # Instalação do decodify
     - name: Instalar dependências para o Decodify
       apt:
         name:
@@ -20,12 +25,12 @@
     - name: Clonar o repositório Decodify
       git:
         repo: https://github.com/UltimateHackers/Decodify
-        dest: ~/Decodify
+        dest: ./Decodify
         clone: yes
         update: yes
 
     - name: Instalar o Decodify
-      shell: cd ~/Decodify && sudo make install
+      shell: cd ./Decodify && sudo make install
       args:
         executable: /bin/bash
 
@@ -38,7 +43,31 @@
     - name: Configurar numlockx para LightDM
       lineinfile:
         path: /etc/lightdm/lightdm.conf
-        regexp: '^(#)?greeter-setup-script='
-        line: 'greeter-setup-script=/usr/bin/numlockx on'
+        regexp: "^(#)?greeter-setup-script="
+        line: "greeter-setup-script=/usr/bin/numlockx on"
         create: yes
       when: ansible_facts.services['lightdm.service'] is defined
+
+    # Definir teclado para PT-BR
+    - name: Definir layout do teclado para Português Brasileiro (console)
+      copy:
+        content: |
+          XKBLAYOUT="br"
+          XKBVARIANT=""
+        dest: /etc/default/keyboard
+        backup: yes
+
+    - name: Reconfigurar layout do teclado
+      command: dpkg-reconfigure -f noninteractive keyboard-configuration
+
+    - name: Reiniciar serviço de configuração do teclado
+      systemd:
+        name: keyboard-setup
+        state: restarted
+
+    - name: Definir layout do teclado para Português Brasileiro (X11)
+      lineinfile:
+        path: ~/.xinitrc
+        line: "setxkbmap br"
+        create: yes
+      when: ansible_env.HOME is defined
