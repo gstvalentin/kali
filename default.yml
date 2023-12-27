@@ -28,3 +28,17 @@
       shell: cd ~/Decodify && sudo make install
       args:
         executable: /bin/bash
+
+    # Adicionando tarefas para instalar e configurar numlockx
+    - name: Instalar numlockx
+      apt:
+        name: numlockx
+        state: present
+
+    - name: Configurar numlockx para LightDM
+      lineinfile:
+        path: /etc/lightdm/lightdm.conf
+        regexp: '^(#)?greeter-setup-script='
+        line: 'greeter-setup-script=/usr/bin/numlockx on'
+        create: yes
+      when: ansible_facts.services['lightdm.service'] is defined
