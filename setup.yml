@@ -1,7 +1,8 @@
 ---
 
-#sudo apt-get update -y && sudo apt-get install ansible -y && mkdir htb && cd htb && git clone https://github.com/gstvalentin/kali.git && ansible-playbook kali/setup.yml -v --ask-become-pass
+#sudo apt-get update -y && sudo apt-get install ansible -y && mkdir htb && cd htb && git clone https://github.com/gstvalentin/kali.git && ansible-playbook kali/setup.yml --ask-become-pass && sudo reebot
 
+#need reebot
 
 - name: Configuração e Instalação no Debian
   hosts: localhost
@@ -11,9 +12,8 @@
     - name: Atualizar todos os pacotes
       apt:
         update_cache: yes
-        upgrade: yes
         autoclean: yes
-        force-apt-get: yes
+        force_apt_get: yes
 
     # Instalação do decodify
     - name: Instalar dependências para o Decodify
