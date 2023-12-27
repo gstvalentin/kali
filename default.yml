@@ -1,0 +1,30 @@
+---
+- name: Configuração e Instalação no Debian
+  hosts: localhost
+  become: yes
+
+  tasks:
+    - name: Atualizar todos os pacotes
+      apt:
+        update_cache: yes
+        upgrade: yes
+        autoclean: yes
+
+    - name: Instalar dependências para o Decodify
+      apt:
+        name:
+          - git
+          - make
+        state: present
+
+    - name: Clonar o repositório Decodify
+      git:
+        repo: https://github.com/UltimateHackers/Decodify
+        dest: ~/Decodify
+        clone: yes
+        update: yes
+
+    - name: Instalar o Decodify
+      shell: cd ~/Decodify && sudo make install
+      args:
+        executable: /bin/bash
